@@ -202,6 +202,55 @@ for json_file in Path("data/announcements").rglob("*.json"):
 
 ---
 
+## 数据流全景
+
+```
+抓取层（sources/）
+  bseinfo_announcement.py   →  原始公告 dict（company_code, pdf_url, date, report_type …）
+  eastmoney_report.py       →  原始文章 dict（infocode, url, title, raw_html …）
+        │
+        │ 原始 dict
+        ▼
+标准化层（normalizers/）
+  bseinfo_normalizer        →  统一 Record（source=bseinfo,  content_status=empty）
+  eastmoney_normalizer      →  统一 Record（source=eastmoney, content_status=downloaded）
+        │
+        │ Record
+        ▼
+存储层（storage/JsonlStore）
+  upsert_record / upsert_records
+        │
+        │ data/records/{date}.jsonl（每行一条 Record）
+        ▼
+读取层（readers/RecordReader）          过滤层（filters/）
+  .by_date()                            filter_announcements()
+  .by_date_range()              ──►     白名单分类 + 关键词分类
+  .source() .category() …               → 候选列表（内存，不落盘）
+        │                                       │
+        │                                       ▼
+        │                             提取层（extractors/）
+        │                               pdf_pipeline.process_records()
+        │                                 1. 下载 PDF → data/raw/
+        │                                 2. extract_text() → 纯文本
+        │                                 3. 清洗（cleaner）
+        │                                 4. 落盘 → data/text/
+        │                                 5. update_content() ──┐
+        │                                                       │
+        ▼                                                       ▼
+更新层（updaters/RecordUpdater）◄────────────────────────────────┘
+  update_content()   回填 content_text / content_status / text_file_path
+  update_summary()   回填 summary / tags / content_status=summarized
+        │
+        │ 重写对应 data/records/{date}.jsonl
+        ▼
+  content_status 流转：
+  empty → downloaded → cleaned → summarized
+                           ↓
+                         failed
+```
+
+---
+
 ## 后续扩展方向
 
 - **SQLite 迁移**：当前 JSONL 方案适合中小数据量。若记录超过 10 万条或需要复杂查询，可将 `JsonlStore` 替换为 SQLite 实现，`RecordReader` 接口不需要改变。
