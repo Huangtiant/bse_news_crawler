@@ -1,8 +1,8 @@
 from pathlib import Path
 from datetime import datetime
-from cleaner import clean_report_record
 import json
 
+from cleaner import clean_report_record
 from storage import save_text
 from sources.eastmoney_report import (
     extract_report_links_with_playwright,
