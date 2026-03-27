@@ -1,6 +1,2 @@
-from pathlib import Path
-
-
-def save_text(file_path: Path, content: str) -> None:
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-    file_path.write_text(content, encoding="utf-8")
+# 此文件已被 storage/ 包取代，内容迁移至 storage/__init__.py。
+# Python 优先加载同名包，此文件不会被实际导入，保留仅作记录。

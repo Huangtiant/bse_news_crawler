@@ -1,0 +1,10 @@
+* text=auto eol=lf
+
+# Python files
+*.py text eol=lf
+
+# Shell
+*.sh text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf

@@ -6,6 +6,5 @@ __pycache__/
 .vscode/
 .DS_Store
 
-data/raw/
-data/processed/
+data/
 logs/
